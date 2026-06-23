@@ -38,8 +38,9 @@ if (registerForm) {
                 return alert(result.message || 'Registration failed');
             }
 
+            localStorage.setItem('isLoggedIn', 'true');
             alert('Registration successful');
-            window.location.href = 'login.html';
+            window.location.href = 'admin.html';
 
         } catch (error) {
             console.error(error);
