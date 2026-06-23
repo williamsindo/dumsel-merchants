@@ -11,22 +11,6 @@ let products = [];
 let cart = JSON.parse(localStorage.getItem('cart') || '[]');
 let currentPaymentMethod = 'mpesa';
 
-function isLoggedIn() {
-    return localStorage.getItem('isLoggedIn') === 'true';
-}
-
-function requireAuthForAdmin() {
-    if (window.location.pathname.endsWith('admin.html') && !isLoggedIn()) {
-        window.location.href = 'register.html';
-    }
-
-    if (isLoggedIn() && (window.location.pathname.endsWith('login.html') || window.location.pathname.endsWith('register.html'))) {
-        window.location.href = 'admin.html';
-    }
-}
-
-requireAuthForAdmin();
-
 // ================= DARK MODE =================
 const darkModeToggle = document.getElementById('dark-mode-toggle');
 if (darkModeToggle) {
@@ -171,7 +155,6 @@ if (loginForm) {
                 return;
             }
 
-            localStorage.setItem('isLoggedIn', 'true');
             alert('Login successful!');
             window.location.href = 'admin.html';
         } catch (error) {

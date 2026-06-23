@@ -1,4 +1,8 @@
+require('dotenv').config();
 const express = require('express');
+const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
+const bcrypt = require('bcryptjs');
 const { Pool } = require('pg');
 const cors = require('cors');
 const path = require('path');
@@ -11,6 +15,7 @@ const app = express();
 // ================= MIDDLEWARE =================
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 
 // Ensure upload directory exists
@@ -39,8 +44,6 @@ const upload = multer({
 // ================= SERVE FRONTEND =================
 const staticPath = path.join(__dirname, 'public');
 
-app.use(express.static(staticPath));
-
 
 // ================= DATABASE CONNECTION =================
 const pool = new Pool({
@@ -49,6 +52,38 @@ const pool = new Pool({
         rejectUnauthorized: false  // Required for Supabase
     }
 });
+
+const sessionStore = new pgSession({
+    pool,
+    tableName: 'session',
+    createTableIfMissing: true
+});
+
+app.use(session({
+    store: sessionStore,
+    secret: process.env.SESSION_SECRET || 'change-this-secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 24 * 60 * 60 * 1000,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax'
+    }
+}));
+
+app.use((req, res, next) => {
+    if ((req.path === '/admin.html' || req.path.startsWith('/api/admin')) && !req.session.user) {
+        if (req.path.startsWith('/api/admin')) {
+            return res.status(401).json({ error: 'Authentication required' });
+        }
+
+        return res.redirect('/register.html');
+    }
+
+    next();
+});
+
+app.use(express.static(staticPath));
 
 pool.connect()
     .then(async () => {
@@ -128,24 +163,44 @@ app.post('/api/login', async (req, res) => {
     try {
 
         const result = await pool.query(
-            'SELECT * FROM users WHERE username = $1 AND password = $2',
-            [username, password]
+            'SELECT * FROM users WHERE username = $1',
+            [username]
         );
 
-        if (result.rows.length > 0) {
-
-            res.json({
-                success: true,
-                user: result.rows[0]
-            });
-
-        } else {
-
-            res.status(401).json({
+        if (result.rows.length === 0) {
+            return res.status(401).json({
                 success: false,
                 message: 'Invalid username or password'
             });
         }
+
+        const user = result.rows[0];
+        const passwordMatch = await bcrypt.compare(password, user.password);
+
+        if (!passwordMatch) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid username or password'
+            });
+        }
+
+        req.session.user = {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            role: user.role
+        };
+
+        res.json({
+            success: true,
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+                created_at: user.created_at
+            }
+        });
 
     } catch (err) {
 
@@ -189,13 +244,22 @@ app.post('/api/register', async (req, res) => {
             });
         }
 
+        const hashedPassword = await bcrypt.hash(password, 10);
+
         const result = await pool.query(
             `INSERT INTO users
             (username, email, password)
             VALUES ($1, $2, $3)
             RETURNING id, username, email, role, created_at`,
-            [username, email, password]
+            [username, email, hashedPassword]
         );
+
+        req.session.user = {
+            id: result.rows[0].id,
+            username: result.rows[0].username,
+            email: result.rows[0].email,
+            role: result.rows[0].role
+        };
 
         res.json({
             success: true,
@@ -212,6 +276,26 @@ app.post('/api/register', async (req, res) => {
             message: err.message
         });
     }
+});
+
+app.post('/api/logout', (req, res) => {
+    req.session.destroy(err => {
+        if (err) {
+            console.error('Logout error:', err);
+            return res.status(500).json({ error: 'Logout failed' });
+        }
+
+        res.clearCookie('connect.sid');
+        res.json({ success: true });
+    });
+});
+
+app.get('/api/auth-status', (req, res) => {
+    if (req.session.user) {
+        return res.json({ authenticated: true, user: req.session.user });
+    }
+
+    res.json({ authenticated: false });
 });
 
 
