@@ -4,9 +4,9 @@ const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const bcrypt = require('bcryptjs');
 const { Pool } = require('pg');
+const { createClient } = require('@supabase/supabase-js');
 const cors = require('cors');
 const path = require('path');
-const fs = require('fs');
 const multer = require('multer');
 
 const app = express();
@@ -18,27 +18,16 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
-// Ensure upload directory exists
-const uploadDir = path.join(__dirname, 'public', 'uploads');
-fs.mkdirSync(uploadDir, { recursive: true });
+// ================= SUPABASE CLIENT =================
+const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_ANON_KEY
+);
+
 
 // ================= MULTER CONFIG =================
-const storage = multer.diskStorage({
-
-    destination: function (req, file, cb) {
-
-        cb(null, uploadDir);
-    },
-
-    filename: function (req, file, cb) {
-
-        cb(null, Date.now() + '-' + file.originalname);
-    }
-});
-
-const upload = multer({
-    storage: storage
-});
+// Use memory storage — no disk saving
+const upload = multer({ storage: multer.memoryStorage() });
 
 
 // ================= SERVE FRONTEND =================
@@ -461,51 +450,44 @@ app.get('/api/admin/products', async (req, res) => {
 
 // ADD PRODUCT WITH IMAGE UPLOAD
 app.post('/api/admin/products', upload.single('image'), async (req, res) => {
-
     try {
-
-        const {
-            name,
-            price,
-            description
-        } = req.body;
+        const { name, price, description } = req.body;
 
         if (!name || !price || !req.file) {
-            return res.status(400).json({
-                success: false,
-                error: 'Name, price, and image are required.'
-            });
+            return res.status(400).json({ success: false, error: 'Name, price, and image are required.' });
         }
 
-        const image = req.file
-            ? `uploads/${req.file.filename}`
-            : null;
+        // Upload image to Supabase Storage
+        const fileName = `${Date.now()}-${req.file.originalname.replace(/\s+/g, '-')}`;
 
+        const { error: uploadError } = await supabase.storage
+            .from('product-images')
+            .upload(fileName, req.file.buffer, {
+                contentType: req.file.mimetype,
+                upsert: false
+            });
+
+        if (uploadError) throw uploadError;
+
+        // Get permanent public URL
+        const { data } = supabase.storage
+            .from('product-images')
+            .getPublicUrl(fileName);
+
+        const imageUrl = data.publicUrl;
+
+        // Save product with Supabase image URL
         const result = await pool.query(
-            `INSERT INTO products
-            (name, price, description, image)
-            VALUES ($1, $2, $3, $4)
-            RETURNING *`,
-            [
-                name,
-                price,
-                description,
-                image
-            ]
+            `INSERT INTO products (name, price, description, image)
+             VALUES ($1, $2, $3, $4) RETURNING *`,
+            [name, price, description, imageUrl]
         );
 
-        res.json({
-            success: true,
-            product: result.rows[0]
-        });
+        res.json({ success: true, product: result.rows[0] });
 
     } catch (err) {
-
         console.error(err);
-
-        res.status(500).json({
-            error: err.message
-        });
+        res.status(500).json({ error: err.message });
     }
 });
 
