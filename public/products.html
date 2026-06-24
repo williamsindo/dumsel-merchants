@@ -12,37 +12,78 @@
         <div class="container">
             <div class="logo">Dumsel Merchants</div>
             <div class="menu-toggle">
-                <span></span>
-                <span></span>
-                <span></span>
+                <span></span><span></span><span></span>
             </div>
             <ul>
                 <li><a href="index.html">Home</a></li>
                 <li><a href="about.html">About Us</a></li>
                 <li><a href="#products">Products</a></li>
                 <li><a href="contact.html">Contact</a></li>
-                <li><a href="login.html">Login</a></li>
+                <li id="nav-auth-link"><a href="login.html">Login</a></li>
             </ul>
         </div>
     </nav>
 
-    <section id="products" class="container" style="padding-top: 8rem;">
-        <h1>Our Products</h1>
-        <div class="products-grid">
-            <!-- Products will be loaded by JavaScript -->
+    <!-- Cart Sidebar -->
+    <div class="cart-overlay" id="cart-overlay"></div>
+    <div class="cart" id="cart-sidebar">
+        <div class="cart-header">
+            <h3><i class="fas fa-shopping-bag"></i> Your Cart</h3>
+            <button class="cart-close" id="cart-close"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="cart-body">
+            <div class="cart-items" id="cart-items-list">
+                <div class="cart-empty">
+                    <i class="fas fa-shopping-cart"></i>
+                    <p>Your cart is empty</p>
+                    <span>Add some products to get started!</span>
+                </div>
+            </div>
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total-row">
+                <span>Total</span>
+                <span class="cart-total" id="cart-total-amount">KSh 0.00</span>
+            </div>
+            <a href="checkout.html" class="btn checkout-btn"><i class="fas fa-lock"></i> Proceed to Checkout</a>
+            <button class="btn clear-cart-btn" id="clear-cart"><i class="fas fa-trash"></i> Clear Cart</button>
+        </div>
+    </div>
+
+    <!-- Floating Cart Button -->
+    <button id="cart-toggle" class="cart-fab">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="cart-badge" id="cart-badge">0</span>
+    </button>
+
+    <section id="products" class="products-section">
+        <div class="container">
+            <div class="products-header">
+                <h1>Our Products</h1>
+                <p>Discover our curated collection of quality products</p>
+            </div>
+
+            <div class="products-filter">
+                <input type="text" id="product-search" placeholder="🔍 Search products..." class="search-input">
+            </div>
+
+            <div class="products-grid" id="products-grid">
+                <!-- Skeleton loaders -->
+                <div class="product-skeleton"></div>
+                <div class="product-skeleton"></div>
+                <div class="product-skeleton"></div>
+                <div class="product-skeleton"></div>
+                <div class="product-skeleton"></div>
+                <div class="product-skeleton"></div>
+            </div>
         </div>
     </section>
 
-    <div class="cart">
-        <h3>Shopping Cart</h3>
-        <div class="cart-items">
-            <!-- Cart items will be loaded here -->
-        </div>
-        <div class="cart-total">Total: $0.00</div>
-        <a href="checkout.html" class="btn">Checkout</a>
+    <!-- Toast notification -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toast-message">Item added to cart!</span>
     </div>
-
-    <button id="cart-toggle"><i class="fas fa-shopping-cart"></i></button>
 
     <footer>
         <div class="container">
@@ -57,14 +98,13 @@
                     <li><a href="about.html">About Us</a></li>
                     <li><a href="products.html">Products</a></li>
                     <li><a href="contact.html">Contact</a></li>
-                    <li><a href="login.html">Login</a></li>
                 </ul>
             </div>
             <div>
                 <h3>Contact Info</h3>
                 <p>Email: info@dumselmerchants.com</p>
-                <p>Phone: 0793883828</p>
-                <p>Address: 123 meru, City, State 12345</p>
+                <p>Phone: +254793883828</p>
+                <p>Address: 123 Meru, Kenya</p>
             </div>
             <div>
                 <h3>Follow Us</h3>
@@ -79,7 +119,6 @@
     </footer>
 
     <button id="dark-mode-toggle"><i class="fas fa-moon"></i></button>
-
     <script src="js/script.js"></script>
 </body>
 </html>

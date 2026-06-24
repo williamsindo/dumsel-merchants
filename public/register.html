@@ -12,9 +12,7 @@
         <div class="container">
             <div class="logo">Dumsel Merchants</div>
             <div class="menu-toggle">
-                <span></span>
-                <span></span>
-                <span></span>
+                <span></span><span></span><span></span>
             </div>
             <ul>
                 <li><a href="index.html">Home</a></li>
@@ -26,63 +24,48 @@
         </div>
     </nav>
 
-    <div class="login-form">
-        <h2>Register</h2>
-        <form id="register-form">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" required>
-
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" required>
-
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
-
-            <label for="confirm-password">Confirm Password</label>
-            <input type="password" id="confirm-password" name="confirm-password" required>
-
-            <button type="submit" class="btn">Register</button>
-        </form>
-        <p>Already have an account? <a href="login.html">Login here</a></p>
-    </div>
-
-    <footer>
-        <div class="container">
-            <div>
-                <h3>Dumsel Merchants</h3>
-                <p>Your trusted online store for quality products.</p>
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-icon"><i class="fas fa-user-plus"></i></div>
+                <h2>Create Account</h2>
+                <p>Join Dumsel Merchants today</p>
             </div>
-            <div>
-                <h3>Quick Links</h3>
-                <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="about.html">About Us</a></li>
-                    <li><a href="products.html">Products</a></li>
-                    <li><a href="contact.html">Contact</a></li>
-                    <li><a href="login.html">Login</a></li>
-                </ul>
-            </div>
-            <div>
-                <h3>Contact Info</h3>
-                <p>Email: info@dumselmerchants.com</p>
-                <p>Phone: +254793883828</p>
-                <p>Address: 123 Meru, City State 12345</p>
-            </div>
-            <div>
-                <h3>Follow Us</h3>
-                <div class="social-links">
-                    <a href="#"><i class="fab fa-facebook"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-linkedin"></i></a>
+
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="username"><i class="fas fa-user"></i> Username</label>
+                    <input type="text" id="username" name="username" placeholder="Choose a username" required>
                 </div>
+                <div class="form-group">
+                    <label for="email"><i class="fas fa-envelope"></i> Email</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="password" name="password" placeholder="Create a password" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password"><i class="fas fa-lock"></i> Confirm Password</label>
+                    <input type="password" id="confirm-password" name="confirm-password" placeholder="Repeat your password" required>
+                </div>
+
+                <div id="register-error" class="auth-message error" style="display:none;"></div>
+                <div id="register-success" class="auth-message success" style="display:none;"></div>
+
+                <button type="submit" class="btn auth-btn" id="register-btn">
+                    <span class="btn-text">Create Account</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Already have an account? <a href="login.html">Sign in here</a></p>
             </div>
         </div>
-    </footer>
+    </div>
 
     <button id="dark-mode-toggle"><i class="fas fa-moon"></i></button>
-
     <script src="js/script.js"></script>
-    <script src="register.js"></script>
 </body>
 </html>
