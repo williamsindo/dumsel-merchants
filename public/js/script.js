@@ -16,7 +16,7 @@ let cart = JSON.parse(localStorage.getItem('cart') || '[]');
 let currentPaymentMethod = 'mpesa';
 
 // ============================================================
-// AUTH HELPERS
+// AUTH & RBAC HELPERS
 // ============================================================
 
 function isLoggedIn() {
@@ -28,6 +28,11 @@ function getUser() {
     catch { return null; }
 }
 
+function isAdmin() {
+    const user = getUser();
+    return user && user.role === 'admin';
+}
+
 function saveUser(user) {
     localStorage.setItem('dumsel_user', JSON.stringify(user));
 }
@@ -37,17 +42,25 @@ function logout() {
     window.location.href = 'login.html';
 }
 
-// Pages that require login
-const protectedPages = ['products.html', 'checkout.html'];
+// ---- Page access rules ----
 const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
-// Redirect to register if not logged in and trying to access protected page
-if (protectedPages.includes(currentPage) && !isLoggedIn()) {
+const guestOnlyPages   = ['login.html', 'register.html'];
+const userPages        = ['products.html', 'checkout.html'];
+const adminOnlyPages   = ['admin.html'];
+
+// Not logged in → trying to access user or admin page → go to register
+if ([...userPages, ...adminOnlyPages].includes(currentPage) && !isLoggedIn()) {
     window.location.href = 'register.html';
 }
 
-// Redirect already-logged-in users away from login/register
-if ((currentPage === 'login.html' || currentPage === 'register.html') && isLoggedIn()) {
+// Logged in as normal user → trying to access admin page → Access Denied
+if (adminOnlyPages.includes(currentPage) && isLoggedIn() && !isAdmin()) {
+    window.location.href = 'access-denied.html';
+}
+
+// Already logged in → trying to visit login/register → go to products
+if (guestOnlyPages.includes(currentPage) && isLoggedIn()) {
     window.location.href = 'products.html';
 }
 
@@ -80,16 +93,25 @@ if (menuToggle) {
     menuToggle.addEventListener('click', () => navUl.classList.toggle('active'));
 }
 
-// Update nav auth link
+// Update nav based on role
 const navAuthLink = document.getElementById('nav-auth-link');
+const navAdminLink = document.getElementById('nav-admin-link');
+
 if (navAuthLink) {
     if (isLoggedIn()) {
         const user = getUser();
         navAuthLink.innerHTML = `
-            <a href="#" onclick="logout()" title="Logout ${user?.username || ''}">
-                <i class="fas fa-sign-out-alt"></i> Logout
+            <a href="#" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout (${user?.username || 'User'})
             </a>`;
+    } else {
+        navAuthLink.innerHTML = `<a href="login.html"><i class="fas fa-sign-in-alt"></i> Login</a>`;
     }
+}
+
+// Show Admin link ONLY for admins — hidden from normal users
+if (navAdminLink) {
+    navAdminLink.style.display = isAdmin() ? 'list-item' : 'none';
 }
 
 // ============================================================
@@ -561,3 +583,16 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCartBadge();
     loadAdminStats();
 });
+
+// ============================================================
+// ADMIN USER INFO SIDEBAR
+// ============================================================
+const adminUserInfo = document.getElementById('admin-user-info');
+if (adminUserInfo && isLoggedIn()) {
+    const user = getUser();
+    adminUserInfo.innerHTML = `
+        <div class="admin-avatar"><i class="fas fa-user-shield"></i></div>
+        <div class="admin-name">${user?.username || 'Admin'}</div>
+        <div class="admin-role"><i class="fas fa-shield-alt"></i> Administrator</div>
+    `;
+}

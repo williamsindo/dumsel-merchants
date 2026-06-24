@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dumsel Merchants - Access Denied</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .denied-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #fff0f0, #ffe0e0);
+            padding: 2rem;
+        }
+        body.dark-mode .denied-wrapper {
+            background: linear-gradient(135deg, #1a0a0a, #2a1010);
+        }
+        .denied-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 3rem 2.5rem;
+            text-align: center;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(220,53,69,0.15);
+            animation: fadeInUp 0.5s ease-out;
+        }
+        body.dark-mode .denied-card { background: #2a2a2a; }
+        .denied-icon {
+            width: 90px; height: 90px;
+            background: linear-gradient(135deg, #ff6b6b, #dc3545);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2.5rem; color: #fff;
+            box-shadow: 0 8px 25px rgba(220,53,69,0.4);
+            animation: shake 0.5s ease-out 0.3s both;
+        }
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            20% { transform: rotate(-10deg); }
+            40% { transform: rotate(10deg); }
+            60% { transform: rotate(-6deg); }
+            80% { transform: rotate(6deg); }
+        }
+        .denied-card h1 {
+            font-size: 2rem;
+            color: #dc3545;
+            margin-bottom: 0.5rem;
+        }
+        .denied-card .error-code {
+            font-size: 5rem;
+            font-weight: 900;
+            color: #dc3545;
+            opacity: 0.1;
+            line-height: 1;
+            margin-bottom: -1rem;
+        }
+        .denied-card p {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 2rem;
+            line-height: 1.7;
+        }
+        body.dark-mode .denied-card p { color: #aaa; }
+        .denied-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b, #dc3545);
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #0056b3;
+            color: #0056b3;
+        }
+        .btn-outline:hover { background: #0056b3; color: #fff; }
+        .role-badge {
+            display: inline-block;
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffc107;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        body.dark-mode .role-badge { background: #2a2000; color: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="denied-wrapper">
+        <div class="denied-card">
+            <div class="error-code">403</div>
+            <div class="denied-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h1>Access Denied</h1>
+            <div class="role-badge" id="user-role-badge">
+                <i class="fas fa-user"></i> Standard User
+            </div>
+            <p>
+                You don't have permission to view this page.<br>
+                This area is restricted to <strong>Administrators only</strong>.<br>
+                If you believe this is a mistake, please contact support.
+            </p>
+            <div class="denied-actions">
+                <a href="products.html" class="btn">
+                    <i class="fas fa-shopping-bag"></i> Go to Products
+                </a>
+                <a href="index.html" class="btn btn-outline">
+                    <i class="fas fa-home"></i> Go Home
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <button id="dark-mode-toggle"><i class="fas fa-moon"></i></button>
+    <script src="js/script.js"></script>
+    <script>
+        // Show current user's role in the badge
+        const user = getUser();
+        const badge = document.getElementById('user-role-badge');
+        if (user && badge) {
+            badge.innerHTML = `<i class="fas fa-user"></i> Logged in as: ${user.username} (${user.role || 'user'})`;
+        }
+    </script>
+</body>
+</html>
